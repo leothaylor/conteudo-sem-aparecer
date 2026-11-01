@@ -118,17 +118,17 @@
 
   const panel = document.createElement('section');
   panel.className = 'cookie-panel';
-  panel.setAttribute('aria-label', 'Preferencias de privacidade');
+  panel.setAttribute('aria-label', 'Preferências de privacidade');
   panel.innerHTML =
     '<strong>Privacidade e cookies</strong>' +
-    '<p>Podemos usar Google Analytics e Clarity para entender a navegacao, e Meta Pixel para medir anuncios. Voce escolhe. A compra funciona sem aceitar.</p>' +
+    '<p>Podemos usar Google Analytics e Clarity para entender a navegação, e Meta Pixel para medir anúncios. Você escolhe. A compra funciona sem aceitar.</p>' +
     '<div class="cookie-actions">' +
       '<button type="button" data-cookie-action="accept">Aceitar opcionais</button>' +
-      '<button type="button" data-cookie-action="reject">Somente necessarios</button>' +
+      '<button type="button" data-cookie-action="reject">Somente necessários</button>' +
     '</div>' +
     '<button type="button" class="cookie-customize" data-cookie-action="customize" aria-expanded="false">Personalizar escolhas</button>' +
     '<div class="cookie-custom" hidden>' +
-      '<label><input type="checkbox" data-cookie-analytics> Analise de visitas (GA4 e Clarity)</label>' +
+      '<label><input type="checkbox" data-cookie-analytics> Análise de visitas (GA4 e Clarity)</label>' +
       '<label><input type="checkbox" data-cookie-marketing> Publicidade (Meta Pixel)</label>' +
       '<button type="button" data-cookie-action="save">Salvar minhas escolhas</button>' +
     '</div>';
@@ -181,7 +181,7 @@
     const preferences = document.createElement('button');
     preferences.className = 'cookie-preferences-link';
     preferences.type = 'button';
-    preferences.textContent = 'Preferencias de privacidade';
+    preferences.textContent = 'Preferências de privacidade';
     preferences.addEventListener('click', showPanel);
     footer.appendChild(preferences);
   }

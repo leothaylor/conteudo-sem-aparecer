@@ -12,7 +12,7 @@
       if (u.protocol === 'https:' && (u.hostname === 'pay.hotmart.com' || u.hostname.endsWith('.hotmart.com'))) url = u;
     }
   } catch (_) { /* No checkout active until verified URL is configured. */ }
-  if (url && slot) {
+  if (url && slot && cfg.checkoutEnabled === true) {
     const attrs = new URLSearchParams(window.location.search);
     ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','src','sck','fbclid'].forEach(function (key) {
       if (attrs.has(key) && !url.searchParams.has(key)) url.searchParams.set(key, String(attrs.get(key)).slice(0,250));
@@ -25,6 +25,12 @@
     const note = document.createElement('p');
     note.textContent = 'Pagamento e entrega digital realizados pela Hotmart.';
     slot.replaceChildren(anchor, note);
+  }
+  if (url && slot && cfg.checkoutEnabled !== true) {
+    const inactive = slot.querySelector('.btn-unavailable');
+    const help = slot.querySelector('p');
+    if (inactive) inactive.textContent = 'Aguardando liberação pela Hotmart';
+    if (help) help.textContent = 'O produto já foi cadastrado. A compra será habilitada aqui após a Hotmart aprovar o produto e o checkout funcionar.';
   }
   const gallery = document.getElementById('gallery');
   const prev = document.querySelector('[data-gallery-prev]');

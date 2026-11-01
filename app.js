@@ -26,6 +26,42 @@
     const note = document.createElement('p');
     note.textContent = 'Pagamento e entrega digital realizados pela Hotmart.';
     slot.replaceChildren(anchor, note);
+
+    // CTA flutuante utiliza a mesma URL validada (incluindo UTMs) do checkout principal.
+    const floating = document.createElement('a');
+    floating.className = 'floating-buy';
+    floating.dataset.track = 'checkout_flutuante';
+    floating.href = url.href;
+    floating.rel = 'noopener noreferrer';
+    floating.setAttribute('aria-label', 'Comprar agora o guia Conteúdo Sem Aparecer por ' + (cfg.priceLabel || 'R$ 47,90'));
+    const floatingLabel = document.createElement('span');
+    floatingLabel.textContent = 'Comprar agora';
+    const floatingPrice = document.createElement('span');
+    floatingPrice.className = 'floating-buy-price';
+    floatingPrice.textContent = cfg.priceLabel || 'R$ 47,90';
+    floating.append(floatingLabel, floatingPrice);
+    document.body.appendChild(floating);
+
+    // Surge depois do início da leitura e desaparece quando o checkout principal está visível.
+    const refreshFloating = function () {
+      const primary = slot.querySelector('.btn-checkout');
+      const bounds = primary ? primary.getBoundingClientRect() : null;
+      const primaryVisible = bounds && bounds.top < window.innerHeight - 25 && bounds.bottom > 30;
+      const shouldShow = (window.scrollY || document.documentElement.scrollTop || 0) > 260 && !primaryVisible;
+      floating.classList.toggle('is-visible', shouldShow);
+    };
+    let pendingFloatingFrame = false;
+    const scheduleFloatingRefresh = function () {
+      if (pendingFloatingFrame) return;
+      pendingFloatingFrame = true;
+      window.requestAnimationFrame(function () {
+        pendingFloatingFrame = false;
+        refreshFloating();
+      });
+    };
+    window.addEventListener('scroll', scheduleFloatingRefresh, { passive: true });
+    window.addEventListener('resize', scheduleFloatingRefresh);
+    refreshFloating();
   }
   if (url && slot && cfg.checkoutEnabled !== true) {
     const inactive = slot.querySelector('.btn-unavailable');
@@ -40,7 +76,7 @@
     if (!element || typeof window.gtag !== 'function') return;
     const id = element.dataset.track;
     if (!id) return;
-    window.gtag('event', id === 'checkout_oferta' ? 'checkout_click' : 'cta_click', {
+    window.gtag('event', id.startsWith('checkout_') ? 'checkout_click' : 'cta_click', {
       cta_id: id
     });
   });

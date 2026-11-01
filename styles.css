@@ -54,3 +54,18 @@
  .product-card,.product-preview img,.social-proof-link{transition:none}
  .product-card:hover,.product-preview:hover img,.social-proof-link:hover{transform:none}
 }
+
+/* Ajustes pontuais para smartphone e realce dos seis passos — 01/11/2026. */
+/* No celular, manter o bloco visual na sequência normal, depois de texto e CTAs. */
+@media(max-width:560px){
+  .hero-grid{display:flex;flex-direction:column;align-items:stretch;min-height:0;gap:24px}
+  .hero-copy{width:100%;max-width:100%;flex:0 0 auto}
+  .hero-visual{flex:0 0 auto;align-self:center}
+}
+/* Feedback cromático sutil, sem mudar a geometria dos cards. */
+.step{transition:background-color .22s ease}
+@media(hover:hover) and (pointer:fine){
+  .step:hover{background-color:#f1f8f5}
+}
+.step:active{background-color:#e6f2ed}
+@media(prefers-reduced-motion:reduce){.step{transition:none}}

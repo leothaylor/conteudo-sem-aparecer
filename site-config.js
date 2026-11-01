@@ -5,7 +5,7 @@
 */
 window.LANDING_CONFIG = {
   checkoutUrl: "https://pay.hotmart.com/P108282775R",
-  checkoutEnabled: false, // Ativar SOMENTE após conferir produto aprovado + checkout funcional.
+  checkoutEnabled: true, // Checkout Hotmart confirmado aberto com formulario e preco R$ 47,90 em 01/11/2026.
   priceLabel: "R$ 47,90",
   checkoutLabel: "Comprar agora — R$ 47,90"
 };

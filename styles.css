@@ -69,3 +69,11 @@
 }
 .step:active{background-color:#e6f2ed}
 @media(prefers-reduced-motion:reduce){.step{transition:none}}
+
+/* V1.4.2 — ordem explícita da primeira dobra em navegadores mobile/in-app. */
+@media(max-width:800px){
+  .hero-grid{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;min-height:0}
+  .hero-copy{position:relative;z-index:2;flex:0 0 auto;width:100%;max-width:100%}
+  .hero-actions{position:relative;z-index:2}
+  .hero-visual{position:relative;z-index:0;flex:0 0 auto;align-self:center;max-width:100%;margin:28px auto 0}
+}

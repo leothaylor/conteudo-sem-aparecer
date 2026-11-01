@@ -32,6 +32,42 @@
     if (inactive) inactive.textContent = 'Aguardando liberação pela Hotmart';
     if (help) help.textContent = 'O produto já foi cadastrado. A compra será habilitada aqui após a Hotmart aprovar o produto e o checkout funcionar.';
   }
+  // V1.4: entrada suave das secoes; conteudo permanece visivel sem suporte ao observer.
+  const revealItems = document.querySelectorAll('[data-reveal]');
+  document.documentElement.classList.add('js');
+  if ('IntersectionObserver' in window && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: .08 });
+    revealItems.forEach(item => observer.observe(item));
+  } else {
+    revealItems.forEach(item => item.classList.add('is-visible'));
+  }
+  // Previa ampliada via dialog nativo, com link direto para imagem como fallback.
+  const previewDialog = document.getElementById('preview-dialog');
+  const previewImage = previewDialog && previewDialog.querySelector('[data-preview-image]');
+  const previewCaption = previewDialog && previewDialog.querySelector('[data-preview-caption]');
+  document.querySelectorAll('.product-preview').forEach(link => {
+    link.addEventListener('click', event => {
+      if (!previewDialog || typeof previewDialog.showModal !== 'function' || !previewImage) return;
+      event.preventDefault();
+      const img = link.querySelector('img');
+      previewImage.src = link.href;
+      previewImage.alt = img ? img.alt : 'Material do guia';
+      if (previewCaption) previewCaption.textContent = img ? img.alt : '';
+      previewDialog.showModal();
+    });
+  });
+  const previewClose = document.querySelector('[data-preview-close]');
+  if (previewClose) previewClose.addEventListener('click', () => previewDialog.close());
+  if (previewDialog) previewDialog.addEventListener('click', event => {
+    if (event.target === previewDialog) previewDialog.close();
+  });
   const gallery = document.getElementById('gallery');
   const prev = document.querySelector('[data-gallery-prev]');
   const next = document.querySelector('[data-gallery-next]');

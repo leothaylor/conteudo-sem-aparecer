@@ -34,6 +34,7 @@
   }
   // V1.4: entrada suave das secoes; conteudo permanece visivel sem suporte ao observer.
   const revealItems = document.querySelectorAll('[data-reveal]');
+  document.documentElement.classList.add('js');
   if ('IntersectionObserver' in window && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {

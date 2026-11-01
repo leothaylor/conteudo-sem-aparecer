@@ -85,3 +85,68 @@
 .guide-sample .guide-sample-preview{display:block;max-width:760px;margin:0 auto;border:1px solid #dbe9e5;border-radius:12px;padding:13px;background:#f9fbfa;box-shadow:0 13px 36px rgba(20,43,51,.06);overflow:hidden}
 .guide-sample .guide-sample-preview img{display:block;width:100%;height:auto;border-radius:6px}
 @media(max-width:560px){.guide-sample{margin-top:36px}.guide-sample .guide-sample-preview{padding:8px}.guide-sample p{padding:0 12px}}
+
+
+/* CTA flutuante discreto: responsivo, seguro em telas com notch e sem competir com o checkout da oferta. */
+.floating-buy{
+  position:fixed;
+  right:clamp(16px,3vw,40px);
+  bottom:calc(20px + env(safe-area-inset-bottom,0px));
+  z-index:90;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  width:max-content;
+  max-width:calc(100vw - 32px);
+  min-height:48px;
+  padding:10px 18px;
+  border:1px solid rgba(255,255,255,.40);
+  border-radius:999px;
+  color:#19283b;
+  background:var(--amber);
+  box-shadow:0 8px 27px rgba(16,31,43,.26);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:800;
+  line-height:1.2;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:translateY(12px);
+  transition:opacity .2s ease,transform .2s ease,visibility .2s;
+}
+.floating-buy.is-visible{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transform:translateY(0);
+}
+.floating-buy-price{
+  padding-left:9px;
+  border-left:1px solid rgba(25,40,59,.30);
+  font-size:12px;
+  font-weight:750;
+  white-space:nowrap;
+}
+.floating-buy::after{content:"↗";font-size:15px;line-height:1}
+.floating-buy:focus-visible{outline:3px solid var(--teal);outline-offset:4px}
+@media(hover:hover) and (pointer:fine){
+  .floating-buy.is-visible:hover{background:#f0c878;transform:translateY(-2px);box-shadow:0 12px 32px rgba(16,31,43,.30)}
+}
+@media(max-width:560px){
+  .floating-buy{
+    right:14px;
+    bottom:calc(14px + env(safe-area-inset-bottom,0px));
+    min-height:46px;
+    padding:10px 14px;
+    gap:7px;
+    font-size:12px;
+    box-shadow:0 7px 24px rgba(16,31,43,.26);
+  }
+  .floating-buy-price{padding-left:8px;font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  .floating-buy{transition:none}
+  .floating-buy.is-visible:hover{transform:none}
+}

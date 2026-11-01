@@ -19,6 +19,7 @@
     });
     const anchor = document.createElement('a');
     anchor.className = 'btn btn-gold btn-checkout';
+    anchor.dataset.track = 'checkout_oferta';
     anchor.href = url.href;
     anchor.rel = 'noopener noreferrer';
     anchor.textContent = cfg.checkoutLabel || 'Comprar com segurança';
@@ -32,6 +33,18 @@
     if (inactive) inactive.textContent = 'Aguardando liberação pela Hotmart';
     if (help) help.textContent = 'O produto já foi cadastrado. A compra será habilitada aqui após a Hotmart aprovar o produto e o checkout funcionar.';
   }
+  // Rastreio GA4: identifica a origem de cada acao sem criar Purchase ou InitiateCheckout.
+  // "click" (saida do dominio) continua sendo medido automaticamente pelo GA4.
+  document.addEventListener('click', function (event) {
+    const element = event.target && event.target.closest ? event.target.closest('[data-track]') : null;
+    if (!element || typeof window.gtag !== 'function') return;
+    const id = element.dataset.track;
+    if (!id) return;
+    window.gtag('event', id === 'checkout_oferta' ? 'checkout_click' : 'cta_click', {
+      cta_id: id
+    });
+  });
+
   // V1.4: entrada suave das secoes; conteudo permanece visivel sem suporte ao observer.
   const revealItems = document.querySelectorAll('[data-reveal]');
   document.documentElement.classList.add('js');

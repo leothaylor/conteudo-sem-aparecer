@@ -201,9 +201,10 @@
   }
 
   const saved = readChoice();
+  // Inicia GA4 e Clarity em modo limitado mesmo sem resposta ao aviso.
+  applyTracking(saved || { analytics: false, marketing: false });
   if (saved) {
     panel.hidden = true;
-    applyTracking(saved);
   } else {
     showPanel();
   }

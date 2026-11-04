@@ -1,6 +1,7 @@
-/* Conteudo Sem Aparecer: consentimento para Analytics, Clarity e Meta Pixel.
-   IDs exclusivos deste produto; nao instalar outros pixels nem eventos Purchase.
-   Script carregado antes de app.js. A escolha pode ser alterada no rodape. */
+/* Conteudo Sem Aparecer: GA4 Consent Mode V2 avancado + Clarity consentv2.
+   Mesmo sem consentimento, GA4 e Clarity podem enviar sinais tecnicos limitados sem cookies;
+   rastreamento completo e Meta Pixel somente conforme a escolha de privacidade.
+   Purchase e InitiateCheckout seguem exclusivamente na Hotmart. */
 (function () {
   'use strict';
   const STORAGE_KEY = 'conteudo_sem_aparecer_privacidade_v1';
@@ -36,25 +37,41 @@
     } catch (_) { /* Navegacao e compra permanecem funcionando. */ }
   }
 
+  function googleConsent(choice) {
+    return {
+      analytics_storage: choice.analytics ? 'granted' : 'denied',
+      ad_storage: choice.marketing ? 'granted' : 'denied',
+      ad_user_data: choice.marketing ? 'granted' : 'denied',
+      ad_personalization: choice.marketing ? 'granted' : 'denied'
+    };
+  }
+
+  function clarityConsent(choice) {
+    return {
+      ad_Storage: choice.marketing ? 'granted' : 'denied',
+      analytics_Storage: choice.analytics ? 'granted' : 'denied'
+    };
+  }
+
   function loadAnalytics(consent) {
     if (analyticsLoaded) {
-      window.gtag('consent', 'update', {
-        analytics_storage: 'granted',
-        ad_storage: consent.marketing ? 'granted' : 'denied',
-        ad_user_data: consent.marketing ? 'granted' : 'denied',
-        ad_personalization: consent.marketing ? 'granted' : 'denied'
-      });
+      window.gtag('consent', 'update', googleConsent(consent));
       return;
     }
     analyticsLoaded = true;
     window.dataLayer = window.dataLayer || [];
     window.gtag = function () { window.dataLayer.push(arguments); };
+    // O default precisa anteceder o config/event, inclusive para visitantes sem escolha salva.
     window.gtag('consent', 'default', {
-      analytics_storage: 'granted',
-      ad_storage: consent.marketing ? 'granted' : 'denied',
-      ad_user_data: consent.marketing ? 'granted' : 'denied',
-      ad_personalization: consent.marketing ? 'granted' : 'denied'
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied'
     });
+    window.gtag('set', 'ads_data_redaction', true);
+    if (consent.analytics || consent.marketing) {
+      window.gtag('consent', 'update', googleConsent(consent));
+    }
     window.gtag('js', new Date());
     window.gtag('config', GA4_ID);
     const script = document.createElement('script');
@@ -64,17 +81,16 @@
   }
 
   function loadClarity(consent) {
-    if (clarityLoaded) return;
-    clarityLoaded = true;
-    (function(c,l,a,r,i,t,y){
-      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments);};
-      t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
-      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window,document,'clarity','script',CLARITY_ID);
-    window.clarity('consentv2', {
-      ad_Storage: consent.marketing ? 'granted' : 'denied',
-      analytics_Storage: 'granted'
-    });
+    if (!clarityLoaded) {
+      clarityLoaded = true;
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments);};
+        t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window,document,'clarity','script',CLARITY_ID);
+    }
+    // Em consentimento negado, a propria Microsoft limita a coleta e nao persiste cookies.
+    window.clarity('consentv2', clarityConsent(consent));
   }
 
   function loadMetaPixel() {
@@ -103,17 +119,10 @@
 
   function applyTracking(choice) {
     active = { analytics: !!choice.analytics, marketing: !!choice.marketing };
-    if (active.analytics) {
-      loadAnalytics(active);
-      loadClarity(active);
-    }
-    if (active.marketing) {
-      loadMetaPixel();
-      if (analyticsLoaded) loadAnalytics(active);
-      if (clarityLoaded) {
-        window.clarity('consentv2', { ad_Storage: 'granted', analytics_Storage: 'granted' });
-      }
-    }
+    // As tags de medicao carregam com estado negado e so habilitam cookies apos consentimento.
+    loadAnalytics(active);
+    loadClarity(active);
+    if (active.marketing) loadMetaPixel();
   }
 
   const panel = document.createElement('section');
@@ -121,7 +130,7 @@
   panel.setAttribute('aria-label', 'Preferências de privacidade');
   panel.innerHTML =
     '<strong>Privacidade e cookies</strong>' +
-    '<p>Podemos usar Google Analytics e Clarity para entender a navegação, e Meta Pixel para medir anúncios. Você escolhe. A compra funciona sem aceitar.</p>' +
+    '<p>GA4 e Clarity podem medir sinais limitados sem cookies mesmo sem opcionais. Com sua autorização, liberam análise completa; o Pixel da Meta só carrega com Publicidade. A compra funciona sem aceitar.</p>' +
     '<div class="cookie-actions">' +
       '<button type="button" data-cookie-action="accept">Aceitar opcionais</button>' +
       '<button type="button" data-cookie-action="reject">Somente necessários</button>' +
@@ -152,7 +161,12 @@
     panel.hidden = true;
     document.body.classList.remove('cookie-choice-open');
     if (withdrawing) {
-      // Recarrega para encerrar scripts de terceiros que ja foram carregados.
+      // Revoga no documento atual e recarrega para interromper tags previamente autorizadas.
+      window.gtag('consent', 'update', googleConsent(choice));
+      window.clarity('consentv2', clarityConsent(choice));
+      if (!choice.marketing && typeof window.fbq === 'function') {
+        window.fbq('consent', 'revoke');
+      }
       window.location.reload();
       return;
     }

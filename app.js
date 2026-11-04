@@ -14,9 +14,17 @@
   } catch (_) { /* No checkout active until verified URL is configured. */ }
   if (url && slot && cfg.checkoutEnabled === true) {
     const attrs = new URLSearchParams(window.location.search);
-    ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','src','sck','fbclid'].forEach(function (key) {
+    ['utm_source','utm_medium','utm_campaign','utm_content','utm_id','utm_term','meta_ad_id','src','sck','fbclid'].forEach(function (key) {
       if (attrs.has(key) && !url.searchParams.has(key)) url.searchParams.set(key, String(attrs.get(key)).slice(0,250));
     });
+    // Hotmart usa src/sck para origem da venda; derivar apenas para links pagos da Meta.
+    const paidMeta = attrs.get('utm_medium') === 'paid_social' &&
+      ['fb', 'ig', 'facebook', 'instagram'].includes((attrs.get('utm_source') || '').toLowerCase());
+    if (paidMeta) {
+      const adId = attrs.get('meta_ad_id') || attrs.get('utm_content');
+      if (!url.searchParams.has('src')) url.searchParams.set('src', 'meta_ads');
+      if (adId && !url.searchParams.has('sck')) url.searchParams.set('sck', String(adId).slice(0,250));
+    }
     const anchor = document.createElement('a');
     anchor.className = 'btn btn-gold btn-checkout';
     anchor.dataset.track = 'checkout_oferta';
